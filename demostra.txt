@@ -1,0 +1,6 @@
+CUADRADO,75
+PELOTA;50;60
+RECTANGULO;60;40
+
+
+lienzo.addFigura(e.getX(), e.getY(), editor.leerarchivo)
