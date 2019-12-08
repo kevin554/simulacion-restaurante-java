@@ -13,7 +13,7 @@ public class Util {
     
     public static final long RUN_TIME = System.currentTimeMillis();
     private static final int VELOCIDAD_REAL = 1000;
-    public static final int VELOCIDAD = VELOCIDAD_REAL;
+    public static final int VELOCIDAD = 50;
     
     public static long getEllapsedTime() {
         long currentTime = System.currentTimeMillis();

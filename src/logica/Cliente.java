@@ -35,6 +35,18 @@ public class Cliente {
         this.alto = 10;   
     }
     
+    public Cliente(long CheckIn, long WaitTime, long ServiceTime, long DepartureTime, int x, int y) {
+        this.CheckIn = CheckIn;
+        this.WaitTime = WaitTime;
+        this.ServiceTime = ServiceTime;
+        this.DepartureTime = DepartureTime;
+        
+        this.posX = x;
+        this.posY = y;
+        this.ancho = 10;
+        this.alto = 10;   
+    }
+    
     public void derecha() {
         posX += velocidad;
     }

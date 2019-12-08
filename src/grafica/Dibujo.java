@@ -31,10 +31,10 @@ public class Dibujo extends JPanel implements Runnable {
         /*
         el negocio comienza en 30, 50
         el negocio mide 130x50
-        cada cliente, circulo de 10x10
+        cada auto, circulo de 10x10
         cada auto, rectangulo de 15x30
         la cola se forma en 70, 60
-        el cliente se va por 50
+        el auto se va por 50
         el auto es atendido en 10,10
         la cola de autos se forma en 10,40,
         */
@@ -43,27 +43,43 @@ public class Dibujo extends JPanel implements Runnable {
             this.repaint();
 
             long ellapsed = Util.getEllapsedTime();
-
-            for (int i = 0; i < clientes.size(); i++) {
+            
+            for (int i = 0; i < 1; i++) {
                 Cliente cliente = clientes.get(i);
 
-//                if (ellapsed / Util.VELOCIDAD < cliente.CheckIn) {
-                if (ellapsed < cliente.CheckIn) {    
+                if ((ellapsed / Util.VELOCIDAD) < cliente.CheckIn) {    
                     continue;
                 }
-
+                
                 // a la cola
-                if (cliente.getPosY() > yCola) {
+                if (cliente.getPosY() > yCola && ellapsed / Util.VELOCIDAD < cliente.ServiceTime) {
                     cliente.arriba();
                 }
+                
+                if (StartTime + ellapsed / Util.VELOCIDAD > cliente.DepartureTime) {
+                    cliente.abajo();
+                }
+            }
+            
+            for (int i = 0; i < 1; i++) {
+                Cliente auto = autos.get(i);
 
-//                if (ellapsed > cliente.DepartureTime) { // * Util.VELOCIDAD) {
-//                    cliente.abajo();
-//                }
+                if ((ellapsed / Util.VELOCIDAD) < auto.CheckIn) {    
+                    continue;
+                }
+                
+                // a la cola
+                if (auto.getPosY() > yCola && ellapsed / Util.VELOCIDAD < auto.ServiceTime) {
+                    auto.arriba();
+                }
+                
+                if (StartTime + ellapsed / Util.VELOCIDAD > auto.DepartureTime) {
+                    auto.arriba();
+                }
             }
 
             try {
-                Thread.sleep(1000);
+                Thread.sleep(10);
             } catch (InterruptedException ex) {
                 // TODO-CODE HERE
             }
@@ -80,16 +96,19 @@ public class Dibujo extends JPanel implements Runnable {
         g.setColor(Color.yellow);
         g.fillRect(0, 0, 130, 50);
 
-        for (Cliente cliente : clientes) {
+        clientes.forEach((cliente) -> {
             cliente.dibujar(g);
-        }
+        });
+        
+        autos.forEach((cliente) -> {
+            cliente.dibujar(g);
+        });
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(Color.black);
 
-        long ellapsed = (long) (Util.getEllapsedTime());//  + StartTime);// * Util.VELOCIDAD);
+        long ellapsed = (long) (Util.getEllapsedTime() + StartTime * Util.VELOCIDAD);
 
-        // g2d.drawString(getMinutes(ellapsed / Util.VELOCIDAD), getWidth() - 100, getHeight() - 50);
         g2d.drawString(getMinutes(ellapsed / Util.VELOCIDAD), getWidth() - 100, getHeight() - 50);
     }
 
@@ -117,7 +136,7 @@ public class Dibujo extends JPanel implements Runnable {
         con una desviación estándar de 2 minutos.
         - Vasos de gaseosa – 5 Bs. Tiempo de servicio 10 segundos.
         
-        Cada cliente tiene la probabilidad de ordenar desde 0 hasta 5 artículos 
+        Cada auto tiene la probabilidad de ordenar desde 0 hasta 5 artículos 
         de cada opción, la cantidad de gaseosas estarán determinadas por el 
         máximo número obtenido en las otras opciones.
         
@@ -125,7 +144,7 @@ public class Dibujo extends JPanel implements Runnable {
         cada opción, para el resto de artículos se le sumará un extra de 20 
         segundos.
         
-        El tiempo de espera del cliente estará determinado por su hora de 
+        El tiempo de espera del auto estará determinado por su hora de 
         llegada más el tiempo de preparación de sus artículos.
         
         Determinar la ganancia promedio por una jornada laboral de 10 horas 
@@ -162,6 +181,7 @@ public class Dibujo extends JPanel implements Runnable {
         
         float StartTimee = this.StartTime;
         float endTime = 10f * 3600f + StartTimee; // 10 hours of work
+        float departureTime = 0;
         int income = 0;
         
         int totalSelledHamburgers = 0;
@@ -170,7 +190,7 @@ public class Dibujo extends JPanel implements Runnable {
         
         printHeader();
         
-        while (StartTimee < endTime) {
+        while (departureTime < endTime) {
             float checkIn = getInverseTransform(lambda);
             
             int howManyHamburgers = randInt(0, MAX_ITEM_ORDER_AMOUNT);
@@ -216,9 +236,9 @@ public class Dibujo extends JPanel implements Runnable {
                 waitTime = 0f;
             }
             
-            float departureTime = StartTimee + checkIn + waitTime + serviceTime;
+            departureTime = StartTimee + checkIn + waitTime + serviceTime;
 
-            Cliente obj = new Cliente((long) (checkIn), (long) waitTime, (long) serviceTime, (long) departureTime);
+            Cliente obj = new Cliente((long) (checkIn), (long) waitTime, (long) serviceTime, (long) departureTime, 50, 480);
             clientes.add(obj);
 
             printRow(clientes.size(), StartTimee + checkIn, waitTime, serviceTime, departureTime);
@@ -229,8 +249,9 @@ public class Dibujo extends JPanel implements Runnable {
         /* reset */
         printHeader();
         StartTimee = 11f * 3600f;
+        departureTime = 0;
         
-        while (StartTimee < endTime) {
+        while (departureTime < endTime) {
             float checkIn = getInverseTransform(lambdaAutoService);
             
             int howManyHamburgers = randInt(0, MAX_ITEM_ORDER_AMOUNT);
@@ -271,14 +292,14 @@ public class Dibujo extends JPanel implements Runnable {
                 previousDepartureTime = autos.get(autos.size() - 1).DepartureTime;
             }
             
-            float waitTime = previousDepartureTime - checkIn;
+            float waitTime = previousDepartureTime - StartTimee + checkIn;
             if (waitTime < 0f) {
                 waitTime = 0f;
             }
             
-            float departureTime = StartTimee + checkIn + waitTime + serviceTime;
+            departureTime = StartTimee + checkIn + waitTime + serviceTime;
 
-            Cliente obj = new Cliente((long) (checkIn), (long) waitTime, (long) serviceTime, (long) departureTime);
+            Cliente obj = new Cliente((long) (checkIn), (long) waitTime, (long) serviceTime, (long) departureTime, 135, 480);
             autos.add(obj);
 
             printRow(autos.size(), StartTimee + checkIn, waitTime, serviceTime, departureTime);
@@ -398,10 +419,6 @@ public class Dibujo extends JPanel implements Runnable {
     public double getX(int time, double z, int standardDeviation) {
         /* x = μ - (z * σ) */
         return time - ( z * standardDeviation);
-    }
-    
-    public double getAsMinutes(double number) {
-        return number;
     }
     
 }
