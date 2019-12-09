@@ -7,6 +7,7 @@ package logica;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 /**
  *
@@ -22,6 +23,7 @@ public class Cliente {
     public long WaitTime;
     public long ServiceTime;
     public long DepartureTime;
+    public int pos;
     
     public Cliente(long CheckIn, long WaitTime, long ServiceTime, long DepartureTime) {
         this.CheckIn = CheckIn;
@@ -36,6 +38,19 @@ public class Cliente {
     }
     
     public Cliente(long CheckIn, long WaitTime, long ServiceTime, long DepartureTime, int x, int y) {
+        this.CheckIn = CheckIn;
+        this.WaitTime = WaitTime;
+        this.ServiceTime = ServiceTime;
+        this.DepartureTime = DepartureTime;
+        
+        this.posX = x;
+        this.posY = y;
+        this.ancho = 10;
+        this.alto = 10;   
+    }
+    
+    public Cliente(int pos, long CheckIn, long WaitTime, long ServiceTime, long DepartureTime, int x, int y) {
+        this.pos = pos;
         this.CheckIn = CheckIn;
         this.WaitTime = WaitTime;
         this.ServiceTime = ServiceTime;
@@ -103,10 +118,16 @@ public class Cliente {
         long ellapsed = Util.getEllapsedTime();
             
         // llega al banco
-        if (ellapsed > CheckIn * Util.VELOCIDAD) {
+//        if (ellapsed > CheckIn * Util.VELOCIDAD) {
             g.setColor(Color.BLUE);
             g.fillOval(this.getPosX(), this.getPosY(), this.getAncho(), this.getAlto());
-        }
+
+//            Graphics2D g2d = (Graphics2D) g;
+//            g2d.setColor(Color.black);
+//
+//            g2d.drawString(pos + "", getPosX(), getPosY());
+
+//        }
         
     }
 }

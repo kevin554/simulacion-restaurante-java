@@ -42,38 +42,53 @@ public class Dibujo extends JPanel implements Runnable {
         while (true) {
             this.repaint();
 
-            long ellapsed = Util.getEllapsedTime();
+            long ellapsed = Util.getEllapsedTime() / Util.VELOCIDAD;
             
-            for (int i = 0; i < 1; i++) {
+            for (int i = 0; i < autos.size(); i++) {
                 Cliente cliente = clientes.get(i);
 
-                if ((ellapsed / Util.VELOCIDAD) < cliente.CheckIn) {    
+                if (ellapsed < cliente.CheckIn - StartTime) {
                     continue;
                 }
                 
                 // a la cola
-                if (cliente.getPosY() > yCola && ellapsed / Util.VELOCIDAD < cliente.ServiceTime) {
+                if (cliente.getPosY() > yCola && ellapsed < cliente.ServiceTime) {
                     cliente.arriba();
                 }
                 
-                if (StartTime + ellapsed / Util.VELOCIDAD > cliente.DepartureTime) {
+                if (StartTime + ellapsed > cliente.DepartureTime) {
                     cliente.abajo();
                 }
             }
             
-            for (int i = 0; i < 1; i++) {
+            for (int i = 0; i < autos.size(); i++) {
                 Cliente auto = autos.get(i);
 
-                if ((ellapsed / Util.VELOCIDAD) < auto.CheckIn) {    
+                if (ellapsed < auto.CheckIn - StartTime) {    
                     continue;
                 }
                 
+                // obtener el lugar en la cola
+                int cuantosEnLaFila = 0;
+                for (int j = 0; j < i; j++) {
+                    Cliente item = autos.get(j);
+
+                    if (ellapsed > item.CheckIn - StartTime && ellapsed < (item.CheckIn - StartTime + item.WaitTime) ) {
+                        cuantosEnLaFila++;
+                    }
+                }
+                
                 // a la cola
-                if (auto.getPosY() > yCola && ellapsed / Util.VELOCIDAD < auto.ServiceTime) {
+                if (auto.getPosY() > yCola + cuantosEnLaFila * 20 && ellapsed < auto.ServiceTime) {
                     auto.arriba();
                 }
                 
-                if (StartTime + ellapsed / Util.VELOCIDAD > auto.DepartureTime) {
+//                // a la cola
+//                if (auto.getPosY() > yCola && ellapsed < auto.ServiceTime) {
+//                    auto.arriba();
+//                }
+                
+                if (StartTime + ellapsed > auto.DepartureTime) {
                     auto.arriba();
                 }
             }
@@ -100,8 +115,8 @@ public class Dibujo extends JPanel implements Runnable {
             cliente.dibujar(g);
         });
         
-        autos.forEach((cliente) -> {
-            cliente.dibujar(g);
+        autos.forEach((auto) -> {
+            auto.dibujar(g);
         });
 
         Graphics2D g2d = (Graphics2D) g;
@@ -238,7 +253,7 @@ public class Dibujo extends JPanel implements Runnable {
             
             departureTime = StartTimee + checkIn + waitTime + serviceTime;
 
-            Cliente obj = new Cliente((long) (checkIn), (long) waitTime, (long) serviceTime, (long) departureTime, 50, 480);
+            Cliente obj = new Cliente((long) (StartTimee + checkIn), (long) waitTime, (long) serviceTime, (long) departureTime, 50, 480);
             clientes.add(obj);
 
             printRow(clientes.size(), StartTimee + checkIn, waitTime, serviceTime, departureTime);
@@ -299,7 +314,7 @@ public class Dibujo extends JPanel implements Runnable {
             
             departureTime = StartTimee + checkIn + waitTime + serviceTime;
 
-            Cliente obj = new Cliente((long) (checkIn), (long) waitTime, (long) serviceTime, (long) departureTime, 135, 480);
+            Cliente obj = new Cliente(autos.size() + 1, (long) (StartTimee + checkIn), (long) waitTime, (long) serviceTime, (long) departureTime, 135, 480);
             autos.add(obj);
 
             printRow(autos.size(), StartTimee + checkIn, waitTime, serviceTime, departureTime);
