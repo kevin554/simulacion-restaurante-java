@@ -42,21 +42,21 @@ public class Dibujo extends JPanel implements Runnable {
         while (true) {
             this.repaint();
 
-            long ellapsed = Util.getEllapsedTime() / Util.VELOCIDAD;
+            long ellapsed = (long) (Util.getEllapsedTime() / Util.VELOCIDAD + StartTime);
             
-            for (int i = 0; i < autos.size(); i++) {
+            for (int i = 0; i < clientes.size(); i++) {
                 Cliente cliente = clientes.get(i);
 
-                if (ellapsed < cliente.CheckIn - StartTime) {
+                if (ellapsed < cliente.CheckIn) {
                     continue;
                 }
                 
-                // a la cola
-                if (cliente.getPosY() > yCola && ellapsed < cliente.ServiceTime) {
+                /* a la cola */
+                if (cliente.getPosY() > yCola && ellapsed < cliente.DepartureTime) {
                     cliente.arriba();
                 }
                 
-                if (StartTime + ellapsed > cliente.DepartureTime) {
+                if (ellapsed > cliente.DepartureTime) {
                     cliente.abajo();
                 }
             }
@@ -64,31 +64,27 @@ public class Dibujo extends JPanel implements Runnable {
             for (int i = 0; i < autos.size(); i++) {
                 Cliente auto = autos.get(i);
 
-                if (ellapsed < auto.CheckIn - StartTime) {    
+                if (ellapsed < auto.CheckIn) {    
                     continue;
                 }
                 
-                // obtener el lugar en la cola
+                /* obtener el lugar en la cola */
                 int cuantosEnLaFila = 0;
                 for (int j = 0; j < i; j++) {
                     Cliente item = autos.get(j);
 
-                    if (ellapsed > item.CheckIn - StartTime && ellapsed < (item.CheckIn - StartTime + item.WaitTime) ) {
-                        cuantosEnLaFila++;
+                    if (item.CheckIn < ellapsed && ellapsed < item.DepartureTime) {
+                        cuantosEnLaFila += 20;
                     }
                 }
                 
-                // a la cola
-                if (auto.getPosY() > yCola + cuantosEnLaFila * 20 && ellapsed < auto.ServiceTime) {
+                /* a la cola */
+                if (auto.getPosY() > yCola + cuantosEnLaFila && ellapsed < auto.DepartureTime) {
                     auto.arriba();
                 }
                 
-//                // a la cola
-//                if (auto.getPosY() > yCola && ellapsed < auto.ServiceTime) {
-//                    auto.arriba();
-//                }
-                
-                if (StartTime + ellapsed > auto.DepartureTime) {
+                /* chau */
+                if (ellapsed > auto.DepartureTime) {
                     auto.arriba();
                 }
             }
